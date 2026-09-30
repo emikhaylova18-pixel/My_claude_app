@@ -1,0 +1,14 @@
+{
+  "name": "Вектор-студия",
+  "short_name": "Вектор",
+  "description": "Фото → векторная схема → правка в редакторе",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FBF3F0",
+  "theme_color": "#FBF3F0",
+  "lang": "ru",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
