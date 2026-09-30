@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <title>Фоторедактор — Студия</title>
+  <meta name="description" content="Фоторедактор для телефона: свет и цвет, фильтры, кадрирование, кисть, текст и ретушь.">
+  <meta name="theme-color" content="#FBF3F0">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Cormorant+Garamond:wght@600;700&family=Manrope:wght@500;600;700;800&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app photo-app">
+    <header class="bar top">
+      <div class="brand">
+        <a class="btn ghost icon" href="./" aria-label="К выбору режима">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+        </a>
+        <span class="brand-name">Фото</span>
+      </div>
+      <div class="top-actions">
+        <button class="btn ghost icon" type="button" id="pUndo" aria-label="Отменить" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7H4V2"/><path d="M4 7a8 8 0 1 1-1 7"/></svg>
+        </button>
+        <button class="btn ghost icon" type="button" id="pRedo" aria-label="Повторить" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 7h5V2"/><path d="M20 7a8 8 0 1 0 1 7"/></svg>
+        </button>
+        <button class="btn ghost icon" type="button" id="pCompare" aria-label="Удерживай, чтобы увидеть оригинал" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4v16" /><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg>
+        </button>
+        <button class="btn ghost icon" type="button" id="pLayers" aria-label="Слои" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg>
+        </button>
+        <button class="btn primary" type="button" id="pExport" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span>Сохранить</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="stage-wrap" id="pStageWrap">
+      <canvas id="pCanvas" class="stage" role="img" aria-label="Редактируемое фото"></canvas>
+      <canvas id="pHist" class="hist" width="136" height="52" hidden aria-hidden="true"></canvas>
+      <div class="zoom">
+        <button class="round small" type="button" id="pFit" aria-label="Показать целиком" hidden>⤢</button>
+      </div>
+
+      <section class="welcome" id="pWelcome">
+        <h1>Фоторедактор</h1>
+        <p>Свет и цвет, фильтры, кадрирование, кисть, текст и ретушь. Оригинал не портится: любую правку можно отменить.</p>
+        <div class="row">
+          <button class="btn primary big" type="button" id="pPick">Выбрать фото</button>
+          <button class="btn big" type="button" id="pCamera">Снять</button>
+          <button class="btn big" type="button" id="pSample">Пример</button>
+        </div>
+      </section>
+
+      <div class="badge" id="pBadge" hidden>Оригинал</div>
+      <div class="busy" id="pBusy" hidden><div class="spinner" aria-hidden="true"></div><p id="pBusyText">Минутку…</p></div>
+      <div class="toast" id="pToast" role="status" hidden></div>
+    </main>
+
+    <section class="panel" id="pPanel" hidden aria-label="Настройки инструмента">
+      <div class="pane" data-pane="adjust">
+        <div class="chips" id="adjChips" role="toolbar" aria-label="Что настраиваем"></div>
+        <div class="slider-row">
+          <span class="slider-name" id="adjName">Экспозиция</span>
+          <output class="slider-val" id="adjVal" for="adjRange">0</output>
+          <button class="mini" type="button" id="adjReset" aria-label="Вернуть к нулю">↺</button>
+        </div>
+        <input type="range" class="big-range" id="adjRange" min="-100" max="100" value="0" aria-labelledby="adjName">
+      </div>
+
+      <div class="pane" data-pane="filters" hidden>
+        <div class="thumbs" id="filterThumbs" role="toolbar" aria-label="Фильтры"></div>
+        <div class="slider-row" id="filterRow">
+          <span class="slider-name" id="filterName">Сила фильтра</span>
+          <output class="slider-val" id="filterVal" for="filterRange">100</output>
+        </div>
+        <input type="range" class="big-range" id="filterRange" min="0" max="100" value="100" aria-labelledby="filterName">
+      </div>
+
+      <div class="pane" data-pane="crop" hidden>
+        <div class="chips" id="aspectChips" role="toolbar" aria-label="Соотношение сторон"></div>
+        <div class="crop-row">
+          <button class="chip-btn" type="button" id="cropRotate" aria-label="Повернуть на 90 градусов">⟳ 90°</button>
+          <button class="chip-btn" type="button" id="cropFlip">⇋ Отразить</button>
+          <label class="mini-range">Наклон <output id="angleVal">0°</output>
+            <input type="range" id="angleRange" min="-45" max="45" step="0.5" value="0">
+          </label>
+          <button class="chip-btn" type="button" id="cropReset">Сброс</button>
+        </div>
+      </div>
+
+      <div class="pane" data-pane="brush" hidden>
+        <div class="brush-top">
+          <div class="seg-mini" role="group" aria-label="Кисть или ластик">
+            <button type="button" data-bmode="paint" aria-pressed="true">Кисть</button>
+            <button type="button" data-bmode="erase" aria-pressed="false">Ластик</button>
+          </div>
+          <div class="swatches" id="brushSwatches"></div>
+          <label class="color-pick" title="Свой цвет"><input type="color" id="brushColor" value="#a8456a" aria-label="Свой цвет кисти"></label>
+        </div>
+        <div class="three">
+          <label>Размер <input type="range" id="brushSize" min="2" max="120" value="24"></label>
+          <label>Мягкость <input type="range" id="brushSoft" min="0" max="100" value="30"></label>
+          <label>Плотность <input type="range" id="brushOpacity" min="5" max="100" value="100"></label>
+        </div>
+      </div>
+
+      <div class="pane" data-pane="heal" hidden>
+        <p class="note">Коснись пятнышка — оно исчезнет. По царапине можно провести пальцем. Двумя пальцами — приблизить.</p>
+        <label class="slider-inline">Размер <input type="range" id="healSize" min="6" max="120" value="28"></label>
+      </div>
+
+      <div class="pane" data-pane="text" hidden>
+        <div class="text-top">
+          <button class="btn primary" type="button" id="textAdd">+ Текст</button>
+          <button class="chip-btn" type="button" id="textEdit" disabled>Изменить</button>
+          <button class="chip-btn" type="button" id="textDelete" disabled>Удалить</button>
+        </div>
+        <div class="text-bottom">
+          <div class="swatches" id="textSwatches"></div>
+          <label class="slider-inline">Размер <input type="range" id="textSize" min="10" max="300" value="80" disabled></label>
+        </div>
+      </div>
+    </section>
+
+    <nav class="bar tools" id="pTools" aria-label="Инструменты">
+      <button class="tool" type="button" data-mode="adjust" aria-pressed="true" disabled>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span>Свет</span>
+      </button>
+      <button class="tool" type="button" data-mode="filters" aria-pressed="false" disabled>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="9" r="5"/><circle cx="15" cy="9" r="5"/><circle cx="12" cy="15" r="5"/></svg><span>Фильтры</span>
+      </button>
+      <button class="tool" type="button" data-mode="crop" aria-pressed="false" disabled>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2v16h16"/><path d="M2 6h16v16"/></svg><span>Кадр</span>
+      </button>
+      <button class="tool" type="button" data-mode="brush" aria-pressed="false" disabled>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4l6 6-8 8-6-6z"/><path d="M6 12c-2 0-3 2-3 4 0 1-1 2-1 2h5c2 0 3-1 3-3"/></svg><span>Кисть</span>
+      </button>
+      <button class="tool" type="button" data-mode="heal" aria-pressed="false" disabled>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="8" width="18" height="8" rx="4" transform="rotate(-45 12 12)"/><path d="M11 11h.01M13 13h.01M11 13h.01M13 11h.01"/></svg><span>Ретушь</span>
+      </button>
+      <button class="tool" type="button" data-mode="text" aria-pressed="false" disabled>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6V4h14v2M12 4v16M9 20h6"/></svg><span>Текст</span>
+      </button>
+    </nav>
+  </div>
+
+  <input type="file" id="pFile" accept="image/*" hidden>
+  <input type="file" id="pCam" accept="image/*" capture="environment" hidden>
+
+  <dialog class="sheet" id="textSheet" aria-labelledby="textTitle">
+    <form method="dialog" class="sheet-in" id="textForm">
+      <h2 id="textTitle">Текст</h2>
+      <textarea id="textInput" class="textarea" rows="2" maxlength="300" placeholder="Напиши что-нибудь…" aria-label="Текст надписи"></textarea>
+      <fieldset class="field seg">
+        <legend>Шрифт</legend>
+        <label><input type="radio" name="tfont" value="sans" checked> Простой</label>
+        <label><input type="radio" name="tfont" value="serif"> Изящный</label>
+        <label><input type="radio" name="tfont" value="hand"> Рукописный</label>
+      </fieldset>
+      <div class="row">
+        <label class="switch"><input type="checkbox" id="textOutline"> Обводка</label>
+        <label class="switch"><input type="checkbox" id="textShadow" checked> Тень</label>
+      </div>
+      <div class="row end">
+        <button class="btn" type="button" id="textCancel">Отмена</button>
+        <button class="btn primary" type="submit">Готово</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="sheet" id="layersSheet" aria-labelledby="layersTitle">
+    <form method="dialog" class="sheet-in">
+      <h2 id="layersTitle">Слои</h2>
+      <p class="note">Верхние слои лежат поверх нижних. Глаз прячет слой, ползунок делает его прозрачнее.</p>
+      <div class="layers" id="layersList"></div>
+      <div class="row end"><button class="btn primary" type="submit">Готово</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="sheet" id="pExportSheet" aria-labelledby="pExportTitle">
+    <form method="dialog" class="sheet-in">
+      <h2 id="pExportTitle">Сохранить фото</h2>
+      <fieldset class="field seg">
+        <legend>Формат</legend>
+        <label><input type="radio" name="efmt" value="jpeg" checked> JPG — для галереи и соцсетей</label>
+        <label><input type="radio" name="efmt" value="png"> PNG — без потерь</label>
+      </fieldset>
+      <fieldset class="field seg" id="eSizes">
+        <legend>Размер</legend>
+        <label><input type="radio" name="esize" value="0" checked> <span id="eSizeFull">Полный</span></label>
+        <label><input type="radio" name="esize" value="2048"> 2048 px</label>
+        <label><input type="radio" name="esize" value="1080"> 1080 px</label>
+      </fieldset>
+      <div class="row">
+        <button class="btn primary big" type="button" id="pDownload">В загрузки</button>
+        <button class="btn big" type="button" id="pShare" hidden>Поделиться</button>
+      </div>
+      <p class="note">Правки сами сохраняются в этом браузере: можно закрыть страницу и вернуться к фото позже.</p>
+      <div class="row end">
+        <button class="btn" type="button" id="pNewPhoto">Другое фото</button>
+        <button class="btn" type="button" id="pResetAll">Сбросить правки</button>
+        <button class="btn" type="submit">Закрыть</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="src/photo/editor.js"></script>
+</body>
+</html>

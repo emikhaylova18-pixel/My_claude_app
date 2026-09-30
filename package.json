@@ -1,11 +1,11 @@
 {
-  "name": "vector-studio",
-  "version": "0.1.0",
+  "name": "studio",
+  "version": "0.2.0",
   "private": true,
-  "description": "Вектор-студия: фото → векторная схема → правка в редакторе",
+  "description": "Студия: фоторедактор и вектор-студия для телефона",
   "type": "module",
   "scripts": {
-    "test": "node --test tests/*.test.js && node --check app/src/main.js"
+    "test": "node --test tests/*.test.js && node --check app/src/vector.js && node --check app/src/home.js && node --check app/src/photo/editor.js"
   },
   "engines": {
     "node": ">=20"

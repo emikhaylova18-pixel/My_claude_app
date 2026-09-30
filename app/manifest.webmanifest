@@ -1,7 +1,7 @@
 {
-  "name": "Вектор-студия",
-  "short_name": "Вектор",
-  "description": "Фото → векторная схема → правка в редакторе",
+  "name": "Студия: фото и вектор",
+  "short_name": "Студия",
+  "description": "Фоторедактор и вектор-студия на телефоне",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -10,5 +10,9 @@
   "lang": "ru",
   "icons": [
     { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Фоторедактор", "url": "photo.html" },
+    { "name": "Вектор-студия", "url": "vector.html" }
   ]
 }
